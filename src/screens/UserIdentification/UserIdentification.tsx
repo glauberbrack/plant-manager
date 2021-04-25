@@ -8,7 +8,9 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Button } from "../../components";
 
@@ -36,6 +38,20 @@ const UserIdentification = () => {
     setName(value);
   };
 
+  const handleSubmit = async () => {
+    if (!name) return Alert.alert("You need to fill your name 😢");
+
+    await AsyncStorage.setItem("@plantmanager:user", name);
+
+    navigate("Confirmation", {
+      title: "All set!",
+      subtitle: "Now we can take care of your plants",
+      buttonTitle: "Start!",
+      icon: "happy",
+      nextScreen: "PlantSelect",
+    });
+  };
+
   return (
     <SafeAreaView style={styles.wrapper}>
       <KeyboardAvoidingView
@@ -55,7 +71,7 @@ const UserIdentification = () => {
               onFocus={handleInputFocus}
               onChangeText={handleInputChange}
             />
-            <Button title="Continue" onPress={() => navigate("Confirmation")} />
+            <Button title="Continue" onPress={() => handleSubmit()} />
           </View>
         </View>
       </KeyboardAvoidingView>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/core";
 import {
   StyleSheet,
   View,
@@ -17,29 +18,19 @@ import api from "../../services/api";
 
 import colors from "../../styles/colors";
 import fonts from "../../styles/fonts";
+import { PlantInterface } from "../../constants/storage";
 
 interface EnvironmentProps {
   key: string;
   title: string;
 }
 
-interface PlantProps {
-  id: string;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
-}
-
 const PlantSelect = () => {
+  const { navigate } = useNavigation();
+
   const [environments, setEnvironments] = useState<EnvironmentProps[]>([]);
-  const [plants, setPlants] = useState<PlantProps[]>([]);
-  const [filteredPlants, setFilteredPlants] = useState<PlantProps[]>([]);
+  const [plants, setPlants] = useState<PlantInterface[]>([]);
+  const [filteredPlants, setFilteredPlants] = useState<PlantInterface[]>([]);
   const [environmentSelected, setEnvironmentSelected] = useState("all");
 
   const [loading, setLoading] = useState(true);
@@ -88,6 +79,10 @@ const PlantSelect = () => {
     fetchPlants();
   };
 
+  const handlePlantSelect = (plant: PlantInterface) => {
+    navigate("PlantSave", { plant });
+  };
+
   useEffect(() => {
     async function fetchEnvironments() {
       const { data } = await api.get(
@@ -124,6 +119,7 @@ const PlantSelect = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.environmentList}
           data={environments}
+          keyExtractor={(item) => String(item.key)}
           renderItem={({ item }) => (
             <EnvironmentButton
               title={item.title}
@@ -136,9 +132,15 @@ const PlantSelect = () => {
       <View style={styles.plantsWrapper}>
         <FlatList
           data={filteredPlants}
+          keyExtractor={(item) => String(item.id)}
           showsVerticalScrollIndicator={false}
           numColumns={2}
-          renderItem={({ item }) => <PlantCardSquare data={item} />}
+          renderItem={({ item }) => (
+            <PlantCardSquare
+              data={item}
+              onPress={() => handlePlantSelect(item)}
+            />
+          )}
           onEndReachedThreshold={0.1}
           onEndReached={({ distanceFromEnd }) =>
             handleFetchMore(distanceFromEnd)
