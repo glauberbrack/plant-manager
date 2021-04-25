@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AppLoading from "expo-app-loading";
+import * as Notifications from "expo-notifications";
+import { PlantInterface } from "./src/constants/storage";
+
 import {
   useFonts,
   Jost_400Regular,
@@ -13,6 +16,27 @@ export default function App() {
     Jost_400Regular,
     Jost_600SemiBold,
   });
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(
+      async (notification) => {
+        const data = notification.request.content.data.plant as PlantInterface;
+        console.log(data);
+      }
+    );
+
+    return () => subscription.remove();
+
+    // async function notifications() {
+    //   await Notifications.cancelAllScheduledNotificationsAsync();
+
+    //   const data = await Notifications.getAllScheduledNotificationsAsync();
+    //   console.log('NOTIFICAÇÕES AGENDADAS #####')
+    //   console.log(data)
+    // }
+
+    // notifications()
+  }, []);
 
   if (!fontsLoaded) {
     return <AppLoading />;
